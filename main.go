@@ -57,7 +57,7 @@ func createText(text string, renderer *sdl.Renderer) *sdl.Texture {
 }
 
 func drawBoard(renderer *sdl.Renderer) {
-	board := makeSquareBoard(pos(100, 100), 80, SqSmHa1)
+	board := makeBoard(square, pos(screenWidth/2, 100), 80, sqSmHa2)
 	board.draw(renderer)
 }
 

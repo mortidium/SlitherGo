@@ -1,14 +1,22 @@
 package main
 
 import (
+	"math"
+
 	"github.com/veandco/go-sdl2/sdl"
 )
 
 const (
 	e      = -1
+	leftP  = -2
+	rightP = -3
 	square = iota
 	hex
 	kite
+)
+
+var (
+	st = math.Sqrt(3)
 )
 
 // Shape crates field shape
@@ -44,45 +52,46 @@ func (s *Shape) draw(renderer *sdl.Renderer) {
 	}
 }
 
-func nextShapePos(shape int, pos *Position, baseSide float64) *Position {
+func rightShapePos(shape int, position *Position, baseSide float64) float64 {
 	switch shape {
 	case square:
-		return &Position{x: pos.x + baseSide, y: pos.y}
+		return position.x + baseSide
+	case hex:
+		return position.x + baseSide*st
 	}
-	return pos
+	return position.x
 }
 
-func downShapePos(shape int, pos *Position, baseSide float64) *Position {
+func downShapePos(shape int, position *Position, baseSide float64) float64 {
 	switch shape {
 	case square:
-		return &Position{x: pos.x, y: pos.y + baseSide}
+		return position.y + baseSide
+	case hex:
+		return position.y + baseSide*3/2
 	}
-	return pos
-}
-
-func (s *Shape) downLShapePos(baseSide float64) *Position {
-	switch s.kind {
-	case square:
-		return &Position{x: s.center.x, y: s.center.y + baseSide}
-	}
-	return s.center
-}
-
-func (s *Shape) downRShapePos(baseSide float64) *Position {
-	switch s.kind {
-	case square:
-		return &Position{x: s.center.x, y: s.center.y + baseSide}
-	}
-	return s.center
+	return position.y
 }
 
 func makeSquare(center *Position, rotation, baseSide float64, num int) *Shape {
 	vertices := []*Position{
-		&Position{x: center.x - baseSide/2, y: center.y - baseSide/2},
-		&Position{x: center.x + baseSide/2, y: center.y - baseSide/2},
-		&Position{x: center.x + baseSide/2, y: center.y + baseSide/2},
-		&Position{x: center.x - baseSide/2, y: center.y + baseSide/2},
+		pos(center.x-baseSide/2, center.y-baseSide/2),
+		pos(center.x+baseSide/2, center.y-baseSide/2),
+		pos(center.x+baseSide/2, center.y+baseSide/2),
+		pos(center.x-baseSide/2, center.y+baseSide/2),
 	}
 	square := &Shape{vertices: vertices, center: center, rotation: rotation, num: num}
 	return square
+}
+
+func makeHex(center *Position, rotation, baseSide float64, num int) *Shape {
+	vertices := []*Position{
+		pos(center.x, center.y-baseSide),
+		pos(center.x+st*baseSide/2, center.y-baseSide/2),
+		pos(center.x+st*baseSide/2, center.y+baseSide/2),
+		pos(center.x, center.y+baseSide),
+		pos(center.x-st*baseSide/2, center.y+baseSide/2),
+		pos(center.x-st*baseSide/2, center.y-baseSide/2),
+	}
+	hex := &Shape{vertices: vertices, center: center, rotation: rotation, num: num}
+	return hex
 }
