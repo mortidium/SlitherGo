@@ -16,8 +16,9 @@ type Board struct {
 	baseSide float64
 }
 
-func (b *Board) draw(renderer *sdl.Renderer) {
-	for _, row := range b.rows {
+func drawBoard(renderer *sdl.Renderer, config *Config) {
+	board := makeBoard(config.shape, pos(config.width/2, config.height/2), config.baseSide, config.proto)
+	for _, row := range board.rows {
 		for _, cell := range row.cells {
 			cell.draw(renderer)
 		}

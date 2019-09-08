@@ -57,11 +57,6 @@ func createText(text string, renderer *sdl.Renderer) *sdl.Texture {
 	return solidTexture
 }
 
-func drawBoard(renderer *sdl.Renderer, config *Config) {
-	board := makeBoard(config.shape, pos(config.width/2, config.height/2), config.baseSide, config.proto)
-	board.draw(renderer)
-}
-
 func filePathWalkDir(root string) ([]string, error) {
 	var files []string
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
@@ -104,7 +99,6 @@ func screenshot(key string) {
 }
 
 func main() {
-
 	key := "SqSmHa1"
 	if len(os.Args) > 1 {
 		key = os.Args[1]
@@ -164,6 +158,5 @@ func main() {
 			screenshot(key)
 			return
 		}
-
 	}
 }
