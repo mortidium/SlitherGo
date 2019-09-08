@@ -21,7 +21,7 @@ func (d *Dot) onDraw(renderer *sdl.Renderer) {
 	renderer.Copy(
 		d.tex,
 		&sdl.Rect{X: 0, Y: 0, W: texWidth, H: texHeight},
-		&sdl.Rect{X: int32(d.pos.x - texWidth/2), Y: int32(d.pos.y - texHeight/2), W: texWidth, H: texHeight})
+		&sdl.Rect{X: int32(d.pos.x - texWidth/3), Y: int32(d.pos.y - texHeight/3), W: texWidth * 2 / 3, H: texHeight * 2 / 3})
 }
 
 func initDot(renderer *sdl.Renderer, position *Position) (*Dot, error) {
