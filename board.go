@@ -60,6 +60,7 @@ func (r *Row) makeRow(shape int, baseSide float64, nums []int) {
 func makeBoard(shape int, center *Position, baseSide float64, rows []string) *Board {
 	rv := &Board{rows: []*Row{}, baseSide: baseSide}
 	centerX := center.x
+	centerY := center.y - float64(len(rows)-1)*downShapePos(shape, pos(0, 0), baseSide)/2
 	for i, r := range rows {
 		ints := convertStrToInts(r)
 		if len(ints) == 0 {
@@ -67,8 +68,8 @@ func makeBoard(shape int, center *Position, baseSide float64, rows []string) *Bo
 		}
 
 		thisRowPosLeft := pos(
-			centerX-float64(len(r))*rightShapePos(shape, pos(0, 0), baseSide)/2,
-			center.y+float64(i)*downShapePos(shape, pos(0, 0), baseSide),
+			centerX-float64(len(r)-1)*rightShapePos(shape, pos(0, 0), baseSide)/2,
+			centerY+float64(i)*downShapePos(shape, pos(0, 0), baseSide),
 		)
 
 		row := &Row{cells: []*Shape{}, first: thisRowPosLeft, last: thisRowPosLeft}

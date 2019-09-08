@@ -3,17 +3,18 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
 )
 
 const (
-	screenWidth  = 1000
-	screenHeight = 1000
-	numWidth     = 18
-	numHeight    = 40
+	numWidth  = 18
+	numHeight = 40
 )
 
 var (
@@ -56,12 +57,65 @@ func createText(text string, renderer *sdl.Renderer) *sdl.Texture {
 	return solidTexture
 }
 
-func drawBoard(renderer *sdl.Renderer) {
-	board := makeBoard(square, pos(screenWidth/2, 100), 80, sqSmHa2)
+func drawBoard(renderer *sdl.Renderer, config *Config) {
+	board := makeBoard(config.shape, pos(config.width/2, config.height/2), config.baseSide, config.proto)
 	board.draw(renderer)
 }
 
+func filePathWalkDir(root string) ([]string, error) {
+	var files []string
+	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if !info.IsDir() {
+			files = append(files, path)
+		}
+		return nil
+	})
+	return files, err
+}
+
+func screenshot(key string) {
+	scrot := exec.Cmd{
+		Path: "/usr/bin/scrot",
+		Args: []string{
+			"'ok.png'",
+			"--focused",
+		},
+	}
+	err := scrot.Run()
+	failOnErr(err, "Failed to make screenshot")
+	currDir, err := os.Getwd()
+	failOnErr(err, "couldn't find curr dir")
+	files, err := filePathWalkDir(currDir)
+	failOnErr(err, "couldn't get files")
+	ss := ""
+	for _, f := range files {
+		if strings.HasSuffix(f, ".png") {
+			ss = f
+			break
+		}
+	}
+	if ss == "" {
+		failOnErr(fmt.Errorf("Kurwa"), "O nie")
+	}
+
+	time.Sleep(100 * time.Millisecond)
+	err = os.Rename(ss, fmt.Sprintf("%v/images/%v.png", currDir, key))
+	failOnErr(err, "renaming")
+}
+
 func main() {
+
+	key := "SqSmHa1"
+	if len(os.Args) > 1 {
+		key = os.Args[1]
+	}
+
+	examples := loadExamples()
+	config, ok := examples[key]
+	if !ok {
+		failOnErr(fmt.Errorf(key), "Example not found")
+	}
+
 	err := sdl.Init(sdl.INIT_EVERYTHING)
 	failOnErr(err, "Failed initializing sdl")
 	defer sdl.Quit()
@@ -73,7 +127,7 @@ func main() {
 	window, err := sdl.CreateWindow(
 		"Slitherlink",
 		sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
-		screenWidth, screenHeight,
+		int32(config.width), int32(config.height),
 		sdl.WINDOW_OPENGL,
 	)
 	failOnErr(err, "Failed creating window")
@@ -90,16 +144,26 @@ func main() {
 	resetColor(renderer)
 	renderer.Clear()
 
-	drawBoard(renderer)
+	drawBoard(renderer, config)
 
 	renderer.Present()
+
+	window.Raise()
 
 	for {
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch event.(type) {
 			case *sdl.QuitEvent:
+				fmt.Println("Not saved")
 				return
 			}
 		}
+		ks := sdl.GetKeyboardState()
+		if ks[sdl.SCANCODE_RETURN] == 1 {
+			fmt.Printf("Saved: %v\n", key)
+			screenshot(key)
+			return
+		}
+
 	}
 }
