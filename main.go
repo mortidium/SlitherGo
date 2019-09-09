@@ -105,7 +105,9 @@ func main() {
 	}
 
 	examples := loadExamples()
-	config, ok := examples[key]
+	examples.print()
+
+	config, ok := (*examples)[key]
 	if !ok {
 		failOnErr(fmt.Errorf(key), "Example not found")
 	}
